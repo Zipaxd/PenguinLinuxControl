@@ -4,7 +4,6 @@ import requests
 import time
 import socket  
 
-# Upewnij się, że ten link jest aktualny z Twoim Ngrokiem!
 API_URL = "https://anyway-gravel-hydrogen.ngrok-free.dev/api/raport" 
 
 # Agent sam zapyta Linuxa o jego nazwę

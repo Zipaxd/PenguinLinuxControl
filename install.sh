@@ -6,7 +6,7 @@
 echo "Rozpoczynam instalację Agenta "
 
 # 1. Instalacja paczek systemowych
-echo "📦 Pobieranie zależności (Python, Psutil, Requests)"
+echo "Pobieranie zależności (Python, Psutil, Requests)"
 apt-get update -y > /dev/null
 apt-get install -y python3 python3-requests python3-psutil curl > /dev/null
 
@@ -20,7 +20,7 @@ echo "⬇️ Pobieranie najnowszego Agenta z chmury"
 curl -s -o agent.py https://raw.githubusercontent.com/TWOJ_NICK/PenguinLinuxControl/main/agent/agent.py
 
 # 4. Tworzenie demona
-echo "⚙️ Rejestrowanie Agenta w jądrze systemu..."
+echo "Rejestrowanie Agenta w jądrze systemu"
 cat <<EOF > /etc/systemd/system/pingwin-agent.service
 [Unit]
 Description=Pingwin MDM Agent (Niezabijalny)
@@ -38,7 +38,7 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-# 5. Odpalenie Agenta na zawsze
+# 5. Odpalenie Agenta
 echo "Uruchamianie procedur startowych"
 systemctl daemon-reload
 systemctl enable pingwin-agent.service

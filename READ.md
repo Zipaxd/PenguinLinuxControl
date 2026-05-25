@@ -7,4 +7,4 @@ System MDM do zarządzania i blokowania stacji roboczych z systemem Linux. Proje
 Aby podłączyć nową maszynę do systemu, zaloguj się jako root i wykonaj poniższe polecenie w terminalu:
 
 ```bash
-curl -s [https://raw.githubusercontent.com/Zipaxd/PenguinLinuxControl/main/install.sh](https://raw.githubusercontent.com/Zipaxd/PenguinLinuxControl/main/install.sh) | bash
+curl -s https://raw.githubusercontent.com/Zipaxd/PenguinLinuxControl/main/install.sh | bash
