@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pingwin-Stróż | PoC Enterprise MDM</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f4f6f9;
+        font-family: "Segoe UI", sans-serif;
+      }
+      .sidebar {
+        min-height: 100vh;
+        background-color: #212529;
+      }
+      .sidebar a {
+        color: #e9ecef;
+        text-decoration: none;
+        padding: 12px 15px;
+        display: block;
+        transition: 0.3s;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        background-color: #343a40;
+        color: #fff;
+        border-left: 4px solid #0d6efd;
+      }
+      .card {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      }
+      .pulse-danger {
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2 sidebar p-0 d-none d-md-block">
+          <div
+            class="p-4 text-center text-white border-bottom border-secondary"
+          >
+            <i class="fa-brands fa-linux fa-3x mb-2 text-info"></i>
+            <h5 class="fw-bold m-0">Pingwin-Stróż</h5>
+          </div>
+          <div class="mt-3">
+            <a href="#" class="active"
+              ><i class="fa-solid fa-gauge-high"></i> Live Dashboard</a
+            >
+          </div>
+        </div>
+
+        <div class="col-md-10 p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold text-dark">
+              <i class="fa-solid fa-chart-line text-primary"></i> Telemetria &
+              MDM
+            </h3>
+            <span id="api-status" class="badge bg-warning text-dark p-2 fs-6"
+              >Łączenie...</span
+            >
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div class="card p-3 shadow-sm text-center">
+                <h6>Aktywne Agenty</h6>
+                <h3 id="kpi-aktywne">0</h3>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card p-3 shadow-sm text-center">
+                <h6>Suma Ruchu</h6>
+                <h3 id="kpi-ruch">0 MB</h3>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card p-3 shadow-sm text-center text-danger">
+                <h6>Wysokie CPU</h6>
+                <h3 id="kpi-ostrzezenia">0</h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h6 class="m-0 fw-bold text-primary">Monitorowanie i Akcje</h6>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle m-0 text-center">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="text-start ps-4">Urządzenie (MAC)</th>
+                      <th>Procesor (CPU)</th>
+                      <th>Pamięć (RAM)</th>
+                      <th>Transfer</th>
+                      <th>Status & Sterowanie</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabela-cialo"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:8000/api/urzadzenia";
+
+      // FUNKCJA: Usuwanie Agenta
+      async function usunAgenta(mac) {
+        if (confirm(`Czy na pewno usunąć urządzenie ${mac}?`)) {
+          await fetch(`http://localhost:8000/api/urzadzenia/${mac}`, {
+            method: "DELETE",
+          });
+          pobierzDane();
+        }
+      }
+
+      // FUNKCJA: Przełącznik Lockdownu
+      async function przelaczLockdown(mac, aktualnyStatus) {
+        const nowyStatus = aktualnyStatus ? 0 : 1;
+        await fetch(
+          `http://localhost:8000/api/urzadzenia/${mac}/lockdown?status=${nowyStatus}`,
+          { method: "POST" },
+        );
+        pobierzDane();
+      }
+
+      async function pobierzDane() {
+        try {
+          const odpowiedz = await fetch(API_URL);
+          const agenty = await odpowiedz.json();
+          const tbody = document.getElementById("tabela-cialo");
+          const apiStatus = document.getElementById("api-status");
+
+          apiStatus.innerHTML =
+            '<i class="fa-solid fa-satellite-dish"></i> Połączono';
+          apiStatus.className = "badge bg-success p-2 fs-6";
+
+          document.getElementById("kpi-aktywne").innerText = agenty.length;
+          let sumaUploadu = 0;
+          let liczbaOstrzezen = 0;
+          tbody.innerHTML = "";
+
+          agenty.forEach((agent) => {
+            sumaUploadu += agent.network_mb;
+            if (agent.cpu > 80) liczbaOstrzezen++;
+
+            let cpuBadge = "bg-success";
+            let rowClass = "";
+            let statusBadge = agent.is_locked
+              ? '<span class="badge bg-danger p-2"><i class="fa-solid fa-lock"></i> ZABLOKOWANY</span>'
+              : '<span class="badge bg-success p-2"><i class="fa-solid fa-shield-check"></i> OK</span>';
+
+            if (agent.cpu > 60) cpuBadge = "bg-warning text-dark";
+            if (agent.cpu > 85) {
+              cpuBadge = "bg-danger pulse-danger";
+              rowClass = "table-danger";
+            }
+
+            const lockBtnClass = agent.is_locked
+              ? "btn-warning"
+              : "btn-outline-danger";
+            const lockBtnText = agent.is_locked ? "Odblokuj" : "LOCKDOWN";
+
+            const wiersz = document.createElement("tr");
+            wiersz.className = rowClass;
+            wiersz.innerHTML = `
+                <td class="text-start ps-4 fw-bold">${agent.mac}</td>
+                <td><span class="badge ${cpuBadge} fs-6">${agent.cpu}%</span></td>
+                <td><span class="badge bg-info text-dark fs-6">${agent.gpu}%</span></td>
+                <td class="fw-bold">${agent.network_mb} MB</td>
+                <td>
+                    ${statusBadge}
+                    <button onclick="przelaczLockdown('${agent.mac}', ${agent.is_locked})" class="btn btn-sm ${lockBtnClass} ms-2">${lockBtnText}</button>
+                    <button onclick="usunAgenta('${agent.mac}')" class="btn btn-sm btn-outline-secondary ms-1"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(wiersz);
+          });
+          document.getElementById("kpi-ruch").innerText =
+            sumaUploadu.toFixed(2) + " MB";
+          document.getElementById("kpi-ostrzezenia").innerText =
+            liczbaOstrzezen;
+        } catch (e) {
+          document.getElementById("api-status").innerHTML = "Błąd API";
+          document.getElementById("api-status").className =
+            "badge bg-danger p-2 fs-6";
+        }
+      }
+
+      setInterval(pobierzDane, 3000);
+      pobierzDane();
+    </script>
+  </body>
+</html>
