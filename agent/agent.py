@@ -45,10 +45,10 @@ while True:
 
         # 4. Logika blokowania komputera (Lockdown)
         if serwer_chce_lockdown and not stan_blokady_lokalny:
-            print("🚨 LOCKDOWN AKTYWOWANY! Zamykam środowisko graficzne.")
+            print("LOCKDOWN AKTYWOWANY! Zamykam środowisko graficzne.")
             
             # Włączenie systemowej blokady logowania
-            os.system('echo "URZADZENIE ZABLOKOWANE PRZEZ ADMINISTRATORA. ZWROC SPRZET." > /etc/nologin')
+            os.system('echo "SKONTAKTUJ SIE Z ADMINISTRATOREM" > /etc/nologin')
             
             # Zmiana domyślnego trybu uruchamiania na konsolowy (zabezpieczenie przed restartem)
             os.system("systemctl set-default multi-user.target")
@@ -63,7 +63,7 @@ while True:
             
         # 5. Logika odblokowania komputera
         elif not serwer_chce_lockdown and stan_blokady_lokalny:
-            print("✅ LOCKDOWN ZDJĘTY! Przywracam dostęp do systemu.")
+            print("LOCKDOWN ZDJĘTY! Przywracam dostęp do systemu.")
             
             # Usunięcie blokady logowania
             os.system("rm -f /etc/nologin")

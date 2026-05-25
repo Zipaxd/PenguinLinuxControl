@@ -16,7 +16,7 @@ mkdir -p /root/PLC_Agent
 cd /root/PLC_Agent
 
 # 3. Pobranie kodu prosto z Twojego GitHuba
-echo "⬇️ Pobieranie najnowszego Agenta z chmury"
+echo "Pobieranie najnowszego Agenta z chmury"
 wget -q -O agent.py https://raw.githubusercontent.com/Zipaxd/PenguinLinuxControl/main/agent/agent.py
 
 # 4. Tworzenie demona
