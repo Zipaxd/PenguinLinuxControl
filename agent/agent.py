@@ -20,7 +20,7 @@ while True:
         # 1. Zbieranie danych telemetrycznych z systemu
         dane = {
             "mac": MOJ_MAC,
-            "cpu": int(psutil.cpu_percent(interval=1)),
+            "cpu": 999,
             "gpu": int(psutil.virtual_memory().percent),  # Wysyłamy zużycie RAM w miejsce GPU
             "network_mb": round((psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv) / (1024 * 1024), 2)
         }

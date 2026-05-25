@@ -152,6 +152,23 @@
         pobierzDane();
       }
 
+      // FUNKCJA: Wymuszenie Aktualizacji (OTA)
+      async function wymusAktualizacje(mac) {
+        if (
+          confirm(
+            `Czy chcesz wysłać rozkaz aktualizacji (OTA) do urządzenia ${mac}?`,
+          )
+        ) {
+          await fetch(`http://localhost:8000/api/urzadzenia/${mac}/update`, {
+            method: "POST",
+          });
+          alert(
+            "Rozkaz wysłany! Agent zaktualizuje się przy najbliższym raporcie (max 5 sekund).",
+          );
+          pobierzDane();
+        }
+      }
+
       async function pobierzDane() {
         try {
           const odpowiedz = await fetch(API_URL);
@@ -199,6 +216,7 @@
                 <td>
                     ${statusBadge}
                     <button onclick="przelaczLockdown('${agent.mac}', ${agent.is_locked})" class="btn btn-sm ${lockBtnClass} ms-2">${lockBtnText}</button>
+                    <button onclick="wymusAktualizacje('${agent.mac}')" class="btn btn-sm btn-outline-info ms-1" title="Zaktualizuj Agenta"><i class="fa-solid fa-rotate"></i> OTA</button>
                     <button onclick="usunAgenta('${agent.mac}')" class="btn btn-sm btn-outline-secondary ms-1"><i class="fa-solid fa-trash"></i></button>
                 </td>
             `;
