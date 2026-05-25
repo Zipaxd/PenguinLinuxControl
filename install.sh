@@ -17,7 +17,7 @@ cd /root/PLC_Agent
 
 # 3. Pobranie kodu prosto z Twojego GitHuba
 echo "⬇️ Pobieranie najnowszego Agenta z chmury"
-curl -s -o agent.py https://raw.githubusercontent.com/TWOJ_NICK/PenguinLinuxControl/main/agent/agent.py
+wget -q -O agent.py https://raw.githubusercontent.com/Zipaxd/PenguinLinuxControl/main/agent/agent.py
 
 # 4. Tworzenie demona
 echo "Rejestrowanie Agenta w jądrze systemu"
